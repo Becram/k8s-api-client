@@ -2,7 +2,7 @@ MODULE = $(shell go list -m)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || echo "1.0.0")
 PACKAGES := $(shell go list ./... | grep -v /vendor/)
 LDFLAGS := -ldflags "-X main.Version=${VERSION}"
-
+DOCKER_IMAGE = "becram/go-api-server"
 PID_FILE := './.pid'
 FSWATCH_FILE := './fswatch.cfg'
 
@@ -44,10 +44,14 @@ run-live: ## run the API server with live reload support (requires fswatch)
 .PHONY: build
 build:  ## build the API server binary
 	CGO_ENABLED=0 go build ${LDFLAGS} -a -o server .  
-	
+
 .PHONY: build-docker
 build-docker: ## build the API server as a docker image
-	docker build -f ./Dockerfile -t server .
+	docker build -f ./Dockerfile -t ${DOCKER_IMAGE}:${VERSION} .
+
+.PHONY: push-docker
+push-docker: ## build the API server as a docker image
+	docker push  ${DOCKER_IMAGE}:${VERSION} 
 
 .PHONY: clean
 clean: ## remove temporary files
