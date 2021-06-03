@@ -33,6 +33,10 @@ jobs:
 
       - name: Build
         run: make build
+      
+      - name: Docker build
+        run: make build-docker
+      
 
 
       # - name: Upload coverage to Codecov
