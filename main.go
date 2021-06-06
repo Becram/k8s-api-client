@@ -6,6 +6,7 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Becram/go-api-server/k8s"
 	"github.com/gorilla/mux"
@@ -31,11 +32,16 @@ func NewRouter() *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
+
+		var handler http.Handler
+		handler = route.HandlerFunc
+		handler = Logger(handler, route.Name)
+
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
-			Handler(route.HandlerFunc)
+			Handler(handler)
 	}
 
 	return router
@@ -56,6 +62,22 @@ var routes = Routes{
 	},
 }
 
+func Logger(inner http.Handler, name string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		inner.ServeHTTP(w, r)
+
+		log.Printf(
+			"%s\t%s\t%s\t%s",
+			r.Method,
+			r.RequestURI,
+			name,
+			time.Since(start),
+		)
+	})
+}
+
 func restartDeployment(w http.ResponseWriter, r *http.Request) {
 
 	// updatedStatus := &status{Deployment: "demo", RestartedAt: "2021-06-06T00:04:34+07:00"}
@@ -73,8 +95,6 @@ func restartDeployment(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(statuses); err != nil {
 		panic(err)
 	}
-	// fmt.Fprintln(w, "Status:", statuses)
-	// fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 
 }
 
@@ -82,16 +102,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
 
-// func handleRequests() {
-// 	http.HandleFunc("/", homePage)
-// 	log.Fatal(http.ListenAndServe(":8080", nil))
-// }
-
 func main() {
 
 	router := NewRouter()
 	log.Fatal(http.ListenAndServe(":8080", router))
-
-	// fmt.Printf("Deployment restarted at %s", k8s.DeploymentRestart("apps", "demo-deployment")["kubectl.kubernetes.io/restartedAt"])
 
 }

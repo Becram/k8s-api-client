@@ -41,11 +41,6 @@ run-live: ## run the API server with live reload support (requires fswatch)
 	@go run ${LDFLAGS} main.go & echo $$! > $(PID_FILE)
 	@fswatch -x -o --event Created --event Updated --event Renamed -r . | xargs -n1 -I {} make run-restart
 
-.PHONY: build
-build:  ## build the API server binary
-    go mod tidy
-	CGO_ENABLED=0 go build ${LDFLAGS} -a -o server .  
-
 .PHONY: build-docker
 build-docker: ## build the API server as a docker image
 	docker build -f ./Dockerfile -t ${DOCKER_IMAGE}:${VERSION} .
@@ -53,6 +48,12 @@ build-docker: ## build the API server as a docker image
 .PHONY: push-docker
 push-docker: ## build the API server as a docker image
 	docker push  ${DOCKER_IMAGE}:${VERSION} 
+
+.PHONY: docker-compose
+docker-compose: ## build the API server as a docker image
+	docker stop go-api-server && docker rm go-api-server
+	docker run -d --name go-api-server becram/go-api-server:${TAG} -v "/home/bikram/.kube:~/kube" -p 8080:8080
+
 
 .PHONY: clean
 clean: ## remove temporary files
