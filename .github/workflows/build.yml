@@ -11,7 +11,7 @@ jobs:
       - name: Set up Go 1.16.3
         uses: actions/setup-go@v1
         with:
-          go-version: 1.16.3
+          go-version: 1.16.5
         id: go
 
       - name: Set up path
@@ -23,16 +23,17 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
-      - name: Get dependencies
-        run: |
-          go mod download
-          go mod verify
+      - name: build go binary
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.16.5
+        run: go build .
  
       # - name: Run go lint
       #   run: make lint
 
-      - name: Build
-        run: make build
+      # - name: Build
+      #   run: make build
       
       - name: Docker build
         run: make build-docker
