@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"example.com/k8s-go-client/k8s"
+	"github.com/Becram/go-api-server/k8s"
 	"github.com/gorilla/mux"
 )
 
