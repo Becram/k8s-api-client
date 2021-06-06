@@ -43,6 +43,7 @@ run-live: ## run the API server with live reload support (requires fswatch)
 
 .PHONY: build
 build:  ## build the API server binary
+    go mod tidy
 	CGO_ENABLED=0 go build ${LDFLAGS} -a -o server .  
 
 .PHONY: build-docker
