@@ -3,41 +3,95 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"log"
 	"net/http"
+
+	"example.com/k8s-go-client/k8s"
+	"github.com/gorilla/mux"
 )
 
-type Article struct {
-	Title   string `json:"Title"`
-	Desc    string `json:"desc"`
-	Content string `json:"content"`
+type Status struct {
+	Deployment  string `json:"Name"`
+	RestartedAt string `json:"RestartedAt"`
 }
 
-// let's declare a global Articles array
-// that we can then populate in our main function
-// to simulate a database
-var Articles []Article
+type Statuses []Status
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!")
-	fmt.Println("Endpoint Hit: homePage")
+type Route struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
 }
 
-func handleRequests() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/articles", returnAllArticles)
-	log.Fatal(http.ListenAndServe(":10000", nil))
+type Routes []Route
+
+func NewRouter() *mux.Router {
+
+	router := mux.NewRouter().StrictSlash(true)
+	for _, route := range routes {
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(route.HandlerFunc)
+	}
+
+	return router
 }
 
-func returnAllArticles(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint Hit: returnAllArticles")
-	json.NewEncoder(w).Encode(Articles)
+var routes = Routes{
+	Route{
+		"Index",
+		"GET",
+		"/",
+		Index,
+	},
+	Route{
+		"restartDeployment",
+		"POST",
+		"/restart",
+		restartDeployment,
+	},
 }
+
+func restartDeployment(w http.ResponseWriter, r *http.Request) {
+
+	// updatedStatus := &status{Deployment: "demo", RestartedAt: "2021-06-06T00:04:34+07:00"}
+	// b, err := json.Marshal(updatedStatus)
+	// if err != nil {
+	// fmt.Fprintf(w, "formdata, %q", html.EscapeString(r.PostFormValue("Name")))
+
+	// }
+	// // return string(b)
+	statuses := Statuses{
+		Status{Deployment: r.PostFormValue("Name"), RestartedAt: k8s.DeploymentRestart("apps", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(statuses); err != nil {
+		panic(err)
+	}
+	// fmt.Fprintln(w, "Status:", statuses)
+	// fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+
+}
+
+func Index(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+}
+
+// func handleRequests() {
+// 	http.HandleFunc("/", homePage)
+// 	log.Fatal(http.ListenAndServe(":8080", nil))
+// }
 
 func main() {
-	Articles = []Article{
-		{Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-		{Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
-	}
-	handleRequests()
+
+	router := NewRouter()
+	log.Fatal(http.ListenAndServe(":8080", router))
+
+	// fmt.Printf("Deployment restarted at %s", k8s.DeploymentRestart("apps", "demo-deployment")["kubectl.kubernetes.io/restartedAt"])
+
 }
