@@ -86,7 +86,7 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 	if retryErr != nil {
 		panic(fmt.Errorf("Update failed: %v", retryErr))
 	}
-	return result.GetAnnotations()
+	return result.Spec.Template.GetAnnotations()
 
 }
 
