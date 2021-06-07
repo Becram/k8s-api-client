@@ -1,1 +1,1 @@
-# go-api-server
+# k8s-api-client

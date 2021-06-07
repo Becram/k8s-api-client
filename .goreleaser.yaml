@@ -1,4 +1,4 @@
-project_name: go-api-server
+project_name: k8s-api-client
 builds:
   - env: [CGO_ENABLED=0]
     goos:
@@ -9,7 +9,7 @@ builds:
       - amd64
       - arm64
 dockers:
-- image_templates: ["becram/go-api-server:{{ .Version }}"]
+- image_templates: ["becram/k8s-api-client:{{ .Version }}"]
   dockerfile: Dockerfile
   build_flag_templates:
   - --label=org.opencontainers.image.title={{ .ProjectName }}

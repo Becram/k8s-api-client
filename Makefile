@@ -2,7 +2,7 @@ MODULE = $(shell go list -m)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || echo "1.0.0")
 PACKAGES := $(shell go list ./... | grep -v /vendor/)
 LDFLAGS := -ldflags "-X main.Version=${VERSION}"
-DOCKER_IMAGE = "becram/go-api-server"
+DOCKER_IMAGE = "becram/k8s-api-client"
 PID_FILE := './.pid'
 FSWATCH_FILE := './fswatch.cfg'
 
@@ -51,8 +51,8 @@ push-docker: ## build the API server as a docker image
 
 .PHONY: docker-compose
 docker-compose: ## build the API server as a docker image
-	docker stop go-api-server && docker rm go-api-server
-	docker run -d --name go-api-server -v "/home/bikram/.kube/config:/.kube/config" -p 8080:8080 becram/go-api-server:${TAG} 
+	docker stop k8s-api-client && docker rm k8s-api-client
+	docker run -d --name k8s-api-client -v "/home/bikram/.kube/config:/.kube/config" -p 8080:8080 becram/k8s-api-client:${TAG} 
 
 
 .PHONY: clean

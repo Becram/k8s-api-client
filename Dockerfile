@@ -1,3 +1,3 @@
 FROM scratch
-COPY go-api-server /usr/bin/go-api-server
-ENTRYPOINT ["/usr/bin/go-api-server"]
+COPY k8s-api-client /usr/bin/k8s-api-client
+ENTRYPOINT ["/usr/bin/k8s-api-client"]
