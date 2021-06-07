@@ -38,37 +38,23 @@ import (
 	// _ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 )
 
-// func Client(s string) []string {
+var kubeconfigPath string
 
-// 	// deploymentsClient := clientset.AppsV1().Deployments("apps")
-// 	deploymentsClient := getClientSet().AppsV1().Deployments(s)
-// 	// fmt.Printf("deploy %s\n", deploymentsClient)
+func init() {
+	if home := homedir.HomeDir(); home != "" {
+		// flag.StringVar(&kubeconfig, filepath.Join("/root", ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+		flag.StringVar(&kubeconfigPath, "kubeconfigPath", filepath.Join(home, ".kube", "config"), "The kube config file path")
+	} else {
+		flag.StringVar(&kubeconfigPath, "kubeconfigPath", "", "The kube config file path")
 
-// 	deployment, err := deploymentsClient.List(context.TODO(), metav1.ListOptions{})
-// 	// deploymentsClient.
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	arr_deployment := make([]string, 0)
-
-// 	for _, d := range deployment.Items {
-// 		arr_deployment = append(arr_deployment, d.Name)
-// 		// fmt.Printf("%s \n", i)
-// 	}
-
-// 	// fmt.Printf("string type %T\n", arr_deployment)
-
-// 	return arr_deployment
-// }
-
-var home = homedir.HomeDir()
-var kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	}
+}
 
 func DeploymentRestart(namespace string, deploymentName string) map[string]string {
 
 	flag.Parse()
 
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
 		panic(err)
 	}

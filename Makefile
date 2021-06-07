@@ -52,7 +52,7 @@ push-docker: ## build the API server as a docker image
 .PHONY: docker-compose
 docker-compose: ## build the API server as a docker image
 	docker stop go-api-server && docker rm go-api-server
-	docker run -d --name go-api-server becram/go-api-server:${TAG} -v "/home/bikram/.kube:~/kube" -p 8080:8080
+	docker run -d --name go-api-server -v "/home/bikram/.kube/config:/.kube/config" -p 8080:8080 becram/go-api-server:${TAG} 
 
 
 .PHONY: clean
