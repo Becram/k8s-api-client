@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Becram/go-api-server/k8s"
+	"github.com/Becram/k8s-api-client/k8s"
 	"github.com/gorilla/mux"
 )
 

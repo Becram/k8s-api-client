@@ -1,4 +1,4 @@
-module github.com/Becram/go-api-server
+module github.com/Becram/k8s-api-client
 
 go 1.16
 
