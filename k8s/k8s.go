@@ -16,14 +16,15 @@ package k8s
 
 import (
 	"context"
-	"flag"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/client-go/util/retry"
@@ -38,31 +39,42 @@ import (
 	// _ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 )
 
-var kubeconfigPath string
+// var kubeconfigPath string
 
-func init() {
-	if home := homedir.HomeDir(); home != "" {
-		// flag.StringVar(&kubeconfig, filepath.Join("/root", ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-		flag.StringVar(&kubeconfigPath, "kubeconfigPath", filepath.Join(home, ".kube", "config"), "The kube config file path")
-	} else {
-		flag.StringVar(&kubeconfigPath, "kubeconfigPath", "", "The kube config file path")
+// func init() {
 
-	}
-}
+// }
+
+// 	// if home := homedir.HomeDir(); home != "" {
+// 	// 	// flag.StringVar(&kubeconfig, filepath.Join("/root", ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+// 	// 	flag.StringVar(&kubeconfigPath, "kubeconfigPath", filepath.Join(home, ".kube", "config"), "The kube config file path")
+// 	// } else {
+// 	// 	flag.StringVar(&kubeconfigPath, "kubeconfigPath", "", "The kube config file path")
+
+// 	// }
+// }
 
 func DeploymentRestart(namespace string, deploymentName string) map[string]string {
 
-	flag.Parse()
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	config, err := rest.InClusterConfig()
 	if err != nil {
-		panic(err)
+		// fallback to kubeconfig
+		home := homedir.HomeDir()
+		kubeconfig := filepath.Join(home, ".kube", "config")
+		if envvar := os.Getenv("KUBECONFIG"); len(envvar) > 0 {
+			kubeconfig = envvar
+		}
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			fmt.Printf("The kubeconfig cannot be loaded: %v\n", err)
+			os.Exit(1)
+		}
+
 	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
-
 	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 	result, getErr := deploymentsClient.Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if getErr != nil {

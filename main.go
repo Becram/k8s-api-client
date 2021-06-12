@@ -78,6 +78,17 @@ func Logger(inner http.Handler, name string) http.Handler {
 	})
 }
 
+// func createToken(w http.ResponseWriter, r *http.Request) {
+// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+// 		"iss": "auth-app",
+// 		"sub": "medium",
+// 		"aud": "any",
+// 		"exp": time.Now().Add(time.Minute * 5).Unix(),
+// 	})
+// 	jwtToken, _ := token.SignedString([]byte("secret"))
+// 	w.Write([]byte(jwtToken))
+// }
+
 func restartDeployment(w http.ResponseWriter, r *http.Request) {
 
 	// updatedStatus := &status{Deployment: "demo", RestartedAt: "2021-06-06T00:04:34+07:00"}
