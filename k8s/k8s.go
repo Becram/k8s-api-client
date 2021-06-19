@@ -98,7 +98,7 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 
 func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 	statuses := Statuses{
-		Status{Deployment: r.PostFormValue("Name"), RestartedAt: DeploymentRestart("apps", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
+		Status{Deployment: r.PostFormValue("Name"), RestartedAt: DeploymentRestart("api", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)

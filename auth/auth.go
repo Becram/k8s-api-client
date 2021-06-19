@@ -32,6 +32,7 @@ func NewAuthenticator() (*Authenticator, error) {
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
+	// fmt.Printf("CLIENT_ID %s", conf.ClientID)
 
 	return &Authenticator{
 		Provider: provider,
