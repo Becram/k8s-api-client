@@ -96,7 +96,7 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 
 }
 
-func restartDeployment(w http.ResponseWriter, r *http.Request) {
+func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 	statuses := Statuses{
 		Status{Deployment: r.PostFormValue("Name"), RestartedAt: DeploymentRestart("apps", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
 	}

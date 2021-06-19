@@ -52,7 +52,7 @@ var routes = Routes{
 		"restartDeployment",
 		"POST",
 		"/restart",
-		k8s.restartDeployment,
+		k8s.RestartDeployment,
 	},
 
 	Route{
