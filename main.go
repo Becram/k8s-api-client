@@ -8,7 +8,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Becram/k8s-api-client/app"
+	"github.com/Becram/k8s-api-client/callback"
+	"github.com/Becram/k8s-api-client/home"
 	"github.com/Becram/k8s-api-client/k8s"
+	"github.com/Becram/k8s-api-client/login"
 	"github.com/gorilla/mux"
 )
 
@@ -52,13 +56,20 @@ var routes = Routes{
 		"Index",
 		"GET",
 		"/",
-		Index,
+		home.HomeHandler,
 	},
 	Route{
 		"restartDeployment",
 		"POST",
 		"/restart",
 		restartDeployment,
+	},
+
+	Route{
+		"login",
+		"get",
+		"/login",
+		login.LoginHandler,
 	},
 }
 
@@ -78,26 +89,9 @@ func Logger(inner http.Handler, name string) http.Handler {
 	})
 }
 
-// func createToken(w http.ResponseWriter, r *http.Request) {
-// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-// 		"iss": "auth-app",
-// 		"sub": "medium",
-// 		"aud": "any",
-// 		"exp": time.Now().Add(time.Minute * 5).Unix(),
-// 	})
-// 	jwtToken, _ := token.SignedString([]byte("secret"))
-// 	w.Write([]byte(jwtToken))
-// }
+
 
 func restartDeployment(w http.ResponseWriter, r *http.Request) {
-
-	// updatedStatus := &status{Deployment: "demo", RestartedAt: "2021-06-06T00:04:34+07:00"}
-	// b, err := json.Marshal(updatedStatus)
-	// if err != nil {
-	// fmt.Fprintf(w, "formdata, %q", html.EscapeString(r.PostFormValue("Name")))
-
-	// }
-	// // return string(b)
 	statuses := Statuses{
 		Status{Deployment: r.PostFormValue("Name"), RestartedAt: k8s.DeploymentRestart("apps", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
 	}
