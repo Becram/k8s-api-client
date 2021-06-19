@@ -9,6 +9,7 @@ import (
 
 	"github.com/Becram/k8s-api-client/home"
 	"github.com/Becram/k8s-api-client/login"
+	"github.com/Becram/k8s-api-client/k8s"
 	"github.com/gorilla/mux"
 )
 
