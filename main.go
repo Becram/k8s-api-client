@@ -1,27 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"html"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/Becram/k8s-api-client/app"
-	"github.com/Becram/k8s-api-client/callback"
 	"github.com/Becram/k8s-api-client/home"
-	"github.com/Becram/k8s-api-client/k8s"
 	"github.com/Becram/k8s-api-client/login"
 	"github.com/gorilla/mux"
 )
-
-type Status struct {
-	Deployment  string `json:"Name"`
-	RestartedAt string `json:"RestartedAt"`
-}
-
-type Statuses []Status
 
 type Route struct {
 	Name        string
@@ -62,7 +51,7 @@ var routes = Routes{
 		"restartDeployment",
 		"POST",
 		"/restart",
-		restartDeployment,
+		k8s.restartDeployment,
 	},
 
 	Route{
@@ -87,20 +76,6 @@ func Logger(inner http.Handler, name string) http.Handler {
 			time.Since(start),
 		)
 	})
-}
-
-
-
-func restartDeployment(w http.ResponseWriter, r *http.Request) {
-	statuses := Statuses{
-		Status{Deployment: r.PostFormValue("Name"), RestartedAt: k8s.DeploymentRestart("apps", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
-	}
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(statuses); err != nil {
-		panic(err)
-	}
-
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {

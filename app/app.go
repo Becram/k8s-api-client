@@ -1,42 +1,25 @@
-
-package auth
+package app
 
 import (
-	"context"
+	"encoding/gob"
 	"log"
-	"os"
 
-	"golang.org/x/oauth2"
-
-	oidc "github.com/coreos/go-oidc"
+	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
 )
 
-type Authenticator struct {
-	Provider *oidc.Provider
-	Config   oauth2.Config
-	Ctx      context.Context
-}
+var (
+	Store *sessions.FilesystemStore
+)
 
-func NewAuthenticator() (*Authenticator, error) {
-	ctx := context.Background()
-
-	provider, err := oidc.NewProvider(ctx, "https://" + os.Getenv("AUTH0_DOMAIN") + "/")
+func Init() error {
+	err := godotenv.Load()
 	if err != nil {
-		log.Printf("failed to get provider: %v", err)
-		return nil, err
+		log.Print(err.Error())
+		return err
 	}
 
-	conf := oauth2.Config{
-		ClientID:     os.Getenv("AUTH0_CLIENT_ID"),
-		ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
-		RedirectURL:  os.Getenv("AUTH0_CALLBACK_URL"),
-		Endpoint: 	  provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile"},
-	}
-
-	return &Authenticator{
-		Provider: provider,
-		Config:   conf,
-		Ctx:      ctx,
-	}, nil
+	Store = sessions.NewFilesystemStore("", []byte("something-very-secret"))
+	gob.Register(map[string]interface{}{})
+	return nil
 }

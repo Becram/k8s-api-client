@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
+	github.com/joho/godotenv v1.3.0
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/spf13/cobra v1.1.3
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect

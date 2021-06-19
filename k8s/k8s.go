@@ -16,7 +16,9 @@ package k8s
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -39,20 +41,12 @@ import (
 	// _ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 )
 
-// var kubeconfigPath string
+type Status struct {
+	Deployment  string `json:"Name"`
+	RestartedAt string `json:"RestartedAt"`
+}
 
-// func init() {
-
-// }
-
-// 	// if home := homedir.HomeDir(); home != "" {
-// 	// 	// flag.StringVar(&kubeconfig, filepath.Join("/root", ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-// 	// 	flag.StringVar(&kubeconfigPath, "kubeconfigPath", filepath.Join(home, ".kube", "config"), "The kube config file path")
-// 	// } else {
-// 	// 	flag.StringVar(&kubeconfigPath, "kubeconfigPath", "", "The kube config file path")
-
-// 	// }
-// }
+type Statuses []Status
 
 func DeploymentRestart(namespace string, deploymentName string) map[string]string {
 
@@ -99,6 +93,18 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 		panic(fmt.Errorf("Update failed: %v", retryErr))
 	}
 	return result.Spec.Template.GetAnnotations()
+
+}
+
+func restartDeployment(w http.ResponseWriter, r *http.Request) {
+	statuses := Statuses{
+		Status{Deployment: r.PostFormValue("Name"), RestartedAt: DeploymentRestart("apps", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(statuses); err != nil {
+		panic(err)
+	}
 
 }
 
