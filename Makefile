@@ -27,7 +27,11 @@ test-cover: test ## run unit tests and show test coverage information
 
 .PHONY: run
 run: ## run the API server
-	go run ${LDFLAGS} main.go
+	go run  main.go
+
+.PHONY: build
+build: ## run the API server
+	go build -o k8s-api-client .
 
 .PHONY: run-restart
 run-restart: ## restart the API server
@@ -57,7 +61,7 @@ docker-compose: ## build the API server as a docker image
 
 .PHONY: clean
 clean: ## remove temporary files
-	rm -rf server coverage.out coverage-all.out
+	rm -rf k8s-api-client coverage.out coverage-all.out
 
 .PHONY: version
 version: ## display the version of the API server

@@ -11,7 +11,7 @@ var (
 )
 
 func Init() error {
-	Store = sessions.NewFilesystemStore("", []byte("something-very-secret"))
+	Store = sessions.NewFilesystemStore("/tmp/teststore", []byte("something-very-secret"))
 	gob.Register(map[string]interface{}{})
 	return nil
 }

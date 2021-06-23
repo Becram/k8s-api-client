@@ -15,3 +15,4 @@ server
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+deploy-hr.yaml

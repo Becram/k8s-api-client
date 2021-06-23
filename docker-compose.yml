@@ -1,0 +1,11 @@
+version: "3.2"
+    
+services:
+  go:
+    build: 
+       context: .
+    restart: always
+    ports:
+    - "8080:8080"
+    command: 
+    - "&"
