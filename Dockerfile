@@ -2,7 +2,7 @@ FROM scratch
 
 WORKDIR /app
 
-COPY go.mod go.sum /app/
+# COPY go.mod go.sum /app/
 
 COPY public /app/public
 
