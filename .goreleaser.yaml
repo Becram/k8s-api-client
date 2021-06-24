@@ -3,18 +3,17 @@ builds:
   - env: [CGO_ENABLED=0]
     goos:
       - linux
-      - windows
-      - darwin
     goarch:
       - amd64
-      - arm64
 dockers:
 - image_templates: ["becram/k8s-api-client:{{ .Version }}"]
   dockerfile: Dockerfile
   build_flag_templates:
   - --label=org.opencontainers.image.title={{ .ProjectName }}
   - --label=org.opencontainers.image.description={{ .ProjectName }}
-nfpms:
+  extra_files:
+  - public
+nfpms: 
 - maintainer: bikram.dhoju@gmail.com
   description: Client for k8s api access from rest.
   homepage: https://github.com/Becram
