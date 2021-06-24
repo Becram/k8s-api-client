@@ -2,10 +2,9 @@ version: "3.2"
     
 services:
   go:
+    image: becram/k8s-api-client:2.1 
     build: 
-       context: .
+      context: .
     restart: always
     ports:
     - "8080:8080"
-    command: 
-    - "&"
