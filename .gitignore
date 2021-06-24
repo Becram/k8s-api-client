@@ -16,3 +16,4 @@ server
 # vendor/
 
 deploy-hr.yaml
+k8s*
