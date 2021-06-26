@@ -7,15 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Becram/k8s-api-client/app"
-	"github.com/Becram/k8s-api-client/callback"
 	"github.com/Becram/k8s-api-client/home"
 	"github.com/Becram/k8s-api-client/k8s"
-	"github.com/Becram/k8s-api-client/login"
-	"github.com/Becram/k8s-api-client/logout"
-	"github.com/Becram/k8s-api-client/middlewares"
-	"github.com/Becram/k8s-api-client/user"
-	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 )
 
@@ -60,27 +53,6 @@ var routes = Routes{
 		"/restart",
 		k8s.RestartDeployment,
 	},
-
-	Route{
-		"login",
-		"get",
-		"/login",
-		login.LoginHandler,
-	},
-
-	Route{
-		"callback",
-		"get",
-		"/callback",
-		callback.CallbackHandler,
-	},
-
-	Route{
-		"logout",
-		"get",
-		"/logout",
-		logout.LogoutHandler,
-	},
 }
 
 func Logger(inner http.Handler, name string) http.Handler {
@@ -105,12 +77,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	app.Init()
 	router := NewRouter()
-	router.Handle("/user", negroni.New(
-		negroni.HandlerFunc(middlewares.IsAuthenticated),
-		negroni.Wrap(http.HandlerFunc(user.UserHandler)),
-	))
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 }

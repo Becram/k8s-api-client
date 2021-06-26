@@ -17,3 +17,4 @@ server
 
 deploy-hr.yaml
 k8s*
+.env

@@ -1,0 +1,11 @@
+FROM golang:1.16
+
+WORKDIR /tmp/app
+
+ADD . /tmp/app/
+
+RUN go build -o main .
+
+CMD ["/tmp/app/main"]
+
+EXPOSE 8080
