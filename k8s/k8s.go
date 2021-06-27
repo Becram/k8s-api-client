@@ -106,6 +106,8 @@ func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	SendSlackNotification(r.PostFormValue("Name"), "restarted")
+
 }
 
 // func AddSeconds() time.Time {
