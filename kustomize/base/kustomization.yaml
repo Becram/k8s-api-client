@@ -1,0 +1,4 @@
+resources:
+- deployments/k8s-api-client.yaml
+- services/k8s-api-client.yaml
+namePrefix: go-

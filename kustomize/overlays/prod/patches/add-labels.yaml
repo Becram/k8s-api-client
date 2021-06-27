@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-api-client
+spec:
+  template:
+    metadata:
+      labels:
+        tier: api
