@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/Becram/k8s-api-client/notifier"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -105,6 +106,7 @@ func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(statuses); err != nil {
 		panic(err)
 	}
+	notifier.SendSlackNotification()
 
 }
 

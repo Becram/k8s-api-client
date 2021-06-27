@@ -61,7 +61,7 @@ func SendSlackNotification(svc string, msg string) error {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	if buf.String() != "ok" {
-		return errors.New("Non-ok response returned from Slack")
+		return errors.New("non-ok response returned from slack")
 	}
 	return nil
 }
