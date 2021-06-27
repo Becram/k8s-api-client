@@ -73,7 +73,7 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 	deploymentsClient := clientset.AppsV1().Deployments(namespace)
 	result, getErr := deploymentsClient.Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if getErr != nil {
-		panic(fmt.Errorf("Failed to get latest version of Deployment: %v", getErr))
+		panic(fmt.Errorf("failed to get latest version of deployment: %v", getErr))
 	}
 	// annotatate := result.Spec.Template.GetAnnotations()
 	// for i, d := range annotatate {
@@ -91,7 +91,7 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 	})
 
 	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
+		panic(fmt.Errorf("update failed: %v", retryErr))
 	}
 	return result.Spec.Template.GetAnnotations()
 
@@ -106,7 +106,7 @@ func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(statuses); err != nil {
 		panic(err)
 	}
-	notifier.SendSlackNotification()
+	notifier.SendSlackNotification(r.PostFormValue("Name"), "Restarted at: "+DeploymentRestart("api", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"])
 
 }
 
