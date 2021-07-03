@@ -84,6 +84,7 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 
 		// result.getErr := deploymentsClient.Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		annotatate := result.Spec.Template.GetAnnotations()
+		fmt.Printf("annotate: %s", annotatate)
 		annotatate["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 		result.Spec.Template.Annotations = annotatate
 		_, updateErr := deploymentsClient.Update(context.TODO(), result, metav1.UpdateOptions{})
@@ -98,23 +99,19 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 }
 
 func RestartDeployment(w http.ResponseWriter, r *http.Request) {
+	deployment := r.PostFormValue("Name")
+	namespace := r.PostFormValue("NS")
+	fmt.Printf("Restarting: %s", deployment)
+
 	statuses := Statuses{
-		Status{Deployment: r.PostFormValue("Name"), RestartedAt: DeploymentRestart("api", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"]},
+		Status{Deployment: deployment, RestartedAt: DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"]},
 	}
+	fmt.Printf("SStatus: %s", statuses)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(statuses); err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to get status: %v", err))
 	}
-	notifier.SendSlackNotification(r.PostFormValue("Name"), "Restarted at: "+DeploymentRestart("api", r.PostFormValue("Name"))["kubectl.kubernetes.io/restartedAt"])
+	notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
 
 }
-
-// func AddSeconds() time.Time {
-
-// 	t := time.Now()
-// 	return t.Add(time.Second * 30)
-
-// }
-
-// func int32Ptr(i int32) *int32 { return &i }

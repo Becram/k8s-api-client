@@ -53,9 +53,9 @@ build-docker: ## build the API server as a docker image
 push-docker: ## build the API server as a docker image
 	docker push  ${DOCKER_IMAGE}:${VERSION} 
 
-.PHONY: docker-compose
-docker-compose: ## build the API server as a docker image
-	docker stop k8s-api-client && docker rm k8s-api-client
+.PHONY: dc
+dc: ## build the API server as a docker image
+	docker rm -f k8s-api-client
 	docker run -d --name k8s-api-client -v "/home/bikram/.kube/config:/.kube/config" -p 8080:8080 becram/k8s-api-client:${TAG} 
 
 

@@ -14,7 +14,7 @@ server
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-
 deploy-hr.yaml
 k8s*
 .env
+kustomize/
