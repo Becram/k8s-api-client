@@ -52,6 +52,7 @@ type Statuses []Status
 func DeploymentRestart(namespace string, deploymentName string) map[string]string {
 
 	config, err := rest.InClusterConfig()
+	fmt.Printf("incluster error %v\n", err)
 	if err != nil {
 		// fallback to kubeconfig
 		home := homedir.HomeDir()
