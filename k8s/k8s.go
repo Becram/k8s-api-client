@@ -49,7 +49,7 @@ type Status struct {
 
 type Statuses []Status
 
-func DeploymentRestart(namespace string, deploymentName string) map[string]string {
+func appInit() *rest.Config {
 
 	config, err := rest.InClusterConfig()
 	fmt.Printf("incluster error %v\n", err)
@@ -67,7 +67,12 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 		}
 
 	}
-	clientset, err := kubernetes.NewForConfig(config)
+	return config
+}
+
+func DeploymentRestart(namespace string, deploymentName string) map[string]string {
+
+	clientset, err := kubernetes.NewForConfig(appInit())
 	if err != nil {
 		panic(err)
 	}
@@ -99,10 +104,27 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 
 }
 
+func DeploymentList(namespace string) []string {
+	var deploymentList []string
+	clientset, err := kubernetes.NewForConfig(appInit())
+	if err != nil {
+		panic(err)
+	}
+	deploymentsClient := clientset.AppsV1().Deployments(namespace)
+	result, getErr := deploymentsClient.List(context.TODO(), metav1.ListOptions{})
+	if getErr != nil {
+		panic(fmt.Errorf("failed to get list of deployments: %v", getErr))
+	}
+	for _, d := range result.Items {
+		deploymentList = append(deploymentList, d.Name)
+		// fmt.Printf(" * %s (%d replicas)\n", d.Name, *d.Spec.Replicas)
+	}
+	return deploymentList
+}
+
 func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 	deployment := r.PostFormValue("Name")
 	namespace := r.PostFormValue("NS")
-	fmt.Printf("Restarting: %s", deployment)
 
 	statuses := Statuses{
 		Status{Deployment: deployment, RestartedAt: DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"]},
@@ -114,5 +136,19 @@ func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 		panic(fmt.Errorf("failed to get status: %v", err))
 	}
 	notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
+
+}
+
+func ListDeployment(w http.ResponseWriter, r *http.Request) {
+	namespace := r.PostFormValue("NS")
+
+	// return json.Marshal(DeploymentList(namespace))
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(DeploymentList(namespace)); err != nil {
+		panic(fmt.Errorf("failed to get status: %v", err))
+	}
+
+	// notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
 
 }

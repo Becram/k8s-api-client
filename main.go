@@ -53,6 +53,12 @@ var routes = Routes{
 		"/restart",
 		k8s.RestartDeployment,
 	},
+	Route{
+		"listDeployment",
+		"POST",
+		"/list",
+		k8s.ListDeployment,
+	},
 }
 
 func Logger(inner http.Handler, name string) http.Handler {
