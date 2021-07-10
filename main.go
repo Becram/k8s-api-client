@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Becram/k8s-api-client/home"
-	"github.com/Becram/k8s-api-client/k8s"
+	"github.com/Becram/k8s-api-client/pkg/home"
+	"github.com/Becram/k8s-api-client/pkg/k8s"
 	"github.com/gorilla/mux"
 )
 

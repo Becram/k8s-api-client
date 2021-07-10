@@ -23,7 +23,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Becram/k8s-api-client/notifier"
+	"github.com/Becram/k8s-api-client/pkg/notifier"
+	util "github.com/Becram/k8s-api-client/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -138,16 +139,25 @@ func DeploymentGet(namespace string) []string {
 func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 	deployment := r.PostFormValue("Name")
 	namespace := r.PostFormValue("NS")
+	if util.FindString(DeploymentGet(namespace), deployment) {
+		statuses := Statuses{
+			Status{Deployment: deployment, RestartedAt: DeploymentUpdate(namespace, deployment)["kubectl.kubernetes.io/restartedAt"]},
+		}
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(statuses); err != nil {
+			panic(fmt.Errorf("failed to get status: %v", err))
+		}
 
-	statuses := Statuses{
-		Status{Deployment: deployment, RestartedAt: DeploymentUpdate(namespace, deployment)["kubectl.kubernetes.io/restartedAt"]},
+		notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentUpdate(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
+	} else {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest)
+		if err := json.NewEncoder(w).Encode("Deployment not found"); err != nil {
+			panic(fmt.Errorf("failed to get status: %v", err))
+		}
+
 	}
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(statuses); err != nil {
-		panic(fmt.Errorf("failed to get status: %v", err))
-	}
-	notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentUpdate(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
 
 }
 
