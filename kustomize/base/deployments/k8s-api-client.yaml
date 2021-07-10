@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-api-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: app
+  template:
+    metadata:
+      labels:
+        service: app
+    spec:
+      serviceAccountName: api
+      containers:
+      - name: k8s-api-client
+        image: becram/k8s-api-client:3.2
+        ports:
+        - containerPort: 8080
+        # env:
+        # # - name: SLACK_WEBHOOK_URL
+        # #   value: "changeme"
+        # # - name: SLACK_CHANNEL
+        # #   value : "#random"
+        # # - name: SLACK_USERNAME
+        # #   value: "app"
