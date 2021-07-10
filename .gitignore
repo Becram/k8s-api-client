@@ -17,5 +17,4 @@ server
 deploy-hr.yaml
 k8s*
 .env
-kustomize/
 k8s-api-client

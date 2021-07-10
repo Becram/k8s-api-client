@@ -26,4 +26,11 @@ response
 [{"Name":"test-app","RestartedAt":"2021-07-10T14:19:13+07:00"}]
 ```
 
-Make sure you ahve access to the  k8s api server
+Make sure you have access to the  k8s api server
+
+
+# to deploy in you cluster 
+
+```
+kustomize build kustomize/overlays | kubectl apply -f -
+```
