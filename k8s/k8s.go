@@ -70,7 +70,7 @@ func appInit() *rest.Config {
 	return config
 }
 
-func DeploymentRestart(namespace string, deploymentName string) map[string]string {
+func DeploymentUpdate(namespace string, deploymentName string) map[string]string {
 
 	clientset, err := kubernetes.NewForConfig(appInit())
 	if err != nil {
@@ -88,11 +88,24 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 
-		// result.getErr := deploymentsClient.Get(context.TODO(), deploymentName, metav1.GetOptions{})
-		annotatate := result.Spec.Template.GetAnnotations()
-		fmt.Printf("annotate: %s", annotatate)
-		annotatate["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
-		result.Spec.Template.Annotations = annotatate
+		if len(result.Spec.Template.GetAnnotations()) != 0 {
+			annotate := result.Spec.Template.GetAnnotations()
+			annotate["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+			result.Spec.Template.Annotations = annotate
+			for i, d := range annotate {
+				fmt.Printf("annotations at %s: %s\n", i, d)
+			}
+
+		} else {
+			fmt.Print("No annoattions")
+			annotate := make(map[string]string)
+			annotate["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+			result.Spec.Template.Annotations = annotate
+			for i, d := range annotate {
+				fmt.Printf("annotations from empty at %s: %s\n", i, d)
+			}
+		}
+
 		_, updateErr := deploymentsClient.Update(context.TODO(), result, metav1.UpdateOptions{})
 		return updateErr
 	})
@@ -104,7 +117,7 @@ func DeploymentRestart(namespace string, deploymentName string) map[string]strin
 
 }
 
-func DeploymentList(namespace string) []string {
+func DeploymentGet(namespace string) []string {
 	var deploymentList []string
 	clientset, err := kubernetes.NewForConfig(appInit())
 	if err != nil {
@@ -127,15 +140,14 @@ func RestartDeployment(w http.ResponseWriter, r *http.Request) {
 	namespace := r.PostFormValue("NS")
 
 	statuses := Statuses{
-		Status{Deployment: deployment, RestartedAt: DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"]},
+		Status{Deployment: deployment, RestartedAt: DeploymentUpdate(namespace, deployment)["kubectl.kubernetes.io/restartedAt"]},
 	}
-	fmt.Printf("SStatus: %s", statuses)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(statuses); err != nil {
 		panic(fmt.Errorf("failed to get status: %v", err))
 	}
-	notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
+	notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentUpdate(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
 
 }
 
@@ -145,10 +157,8 @@ func ListDeployment(w http.ResponseWriter, r *http.Request) {
 	// return json.Marshal(DeploymentList(namespace))
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(DeploymentList(namespace)); err != nil {
+	if err := json.NewEncoder(w).Encode(DeploymentGet(namespace)); err != nil {
 		panic(fmt.Errorf("failed to get status: %v", err))
 	}
-
-	// notifier.SendSlackNotification(deployment, "Restarted at: "+DeploymentRestart(namespace, deployment)["kubectl.kubernetes.io/restartedAt"])
 
 }

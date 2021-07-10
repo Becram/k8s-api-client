@@ -84,6 +84,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	router := NewRouter()
+	fmt.Print("Serving http request at localhost:8080.....\n")
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
